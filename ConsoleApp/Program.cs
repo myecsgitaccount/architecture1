@@ -1,4 +1,5 @@
-﻿using CustomerApp.Core.Entity;
+﻿using CustomerApp.Core.DomainService;
+using CustomerApp.Core.Entity;
 using System;
 using System.Collections.Generic;
 
@@ -6,27 +7,27 @@ namespace ConsoleApp
 {
     class Program
     {
-        static int id = 1;
-        static List<Customer> customers = new List<Customer>();
-
+        static ICustomerRepository customerRepository;
+        
         static void Main(string[] args)
         {
             var cust1 = new Customer()
-            {
-                Id = id++,
+            {                
                 FirstName = "Bob",
                 LastName = "Dylan",
                 Address = "BongoStreet 202"
             };
-            customers.Add(cust1);
 
-            customers.Add(new Customer()
-            {
-                Id = id++,
+            customerRepository.Create(cust1); 
+
+            var cust2 = new Customer()            
+            {                
                 FirstName = "Lars",
                 LastName = "Bilde",
                 Address = "Ostestrasse 202"
-            });
+            };
+
+            customerRepository.Create(cust2);  
 
             string[] menuItems = {
                 "List All Customers",
@@ -90,14 +91,7 @@ namespace ConsoleApp
                 Console.WriteLine("Please insert a number");
             }
 
-            foreach (var customer in customers)
-            {
-                if (customer.Id == id)
-                {
-                    return customer;
-                }
-            }
-            return null;
+            return customerRepository.ReadById(id); 
         }
 
         private static void DeleteCustomer()
@@ -106,7 +100,7 @@ namespace ConsoleApp
             var customerFound = FindCustomerById();
             if (customerFound != null)
             {
-                customers.Remove(customerFound);
+                customerRepository.Delete(customerFound.Id); 
             }
         }
 
@@ -121,19 +115,20 @@ namespace ConsoleApp
             Console.WriteLine("Address: ");
             var address = Console.ReadLine();
 
-            customers.Add(new Customer()
-            {
-                Id = id++,
+            var cust = new Customer()
+            {                
                 FirstName = firstName,
                 LastName = lastName,
                 Address = address
-            });
+            };
+            customerRepository.Create(cust); 
         }
 
         private static void ListCustomers()
         {
             Console.WriteLine("\nList of Customers");
-            foreach (var customer in customers)
+            var custs = customerRepository.ReadAll();
+            foreach (var customer in custs)
             {
                 Console.WriteLine($"Id: {customer.Id} Name: {customer.FirstName} " +
                                 $"{customer.LastName} " +
@@ -142,6 +137,8 @@ namespace ConsoleApp
             Console.WriteLine("\n");
 
         }
+
+       
 
         private static int ShowMenu(string[] menuItems)
         {
@@ -163,5 +160,7 @@ namespace ConsoleApp
 
             return selection;
         }
+
+       
     }
 }
